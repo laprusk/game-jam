@@ -11,9 +11,9 @@ public class Dice : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI valueText;
     [SerializeField]
-    private float rollDuration = 1.0f;
-    [SerializeField]
     private float rollInterval = 0.2f;
+    [SerializeField]
+    private Sprite[] diceFaces;
 
     // Start is called before the first frame update
     void Start()
@@ -77,5 +77,6 @@ public class Dice : MonoBehaviour
     public void UpdateValueText()
     {
         valueText.text = Value.ToString();
+        GetComponent<SpriteRenderer>().sprite = diceFaces[Value - 1];
     }
 }

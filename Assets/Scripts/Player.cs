@@ -4,10 +4,13 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    public int PlayerId { get; set; }
     public Node CurrentNode { get; set; }
-    private int supporters = 0;
+    public int Supporters { get; set; }
     [SerializeField]
     private float movementSpeed = 5.0f;
+    [SerializeField]
+    private Sprite[] playerSprites;
     public bool IsMoving { get; private set; }
 
     // Start is called before the first frame update
@@ -15,6 +18,9 @@ public class Player : MonoBehaviour
     {
         // プレイヤーの初期位置を設定
         transform.position = CurrentNode.transform.position;
+
+        // プレイヤーのスプライトを設定
+        GetComponent<SpriteRenderer>().sprite = playerSprites[PlayerId % playerSprites.Length];
     }
 
     // Update is called once per frame
