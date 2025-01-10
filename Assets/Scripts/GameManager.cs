@@ -31,6 +31,8 @@ public class GameManager : MonoBehaviour
     private int remainingMoves = 0;
     [SerializeField]
     private Node nextNode;
+    [SerializeField]
+    private GUIStyle textStyle;
 
     // Start is called before the first frame update
     void Start()
@@ -42,8 +44,9 @@ public class GameManager : MonoBehaviour
         {
             GameObject playerObject = Instantiate(playerPrefab);
             Player player = playerObject.GetComponent<Player>();
+            player.PlayerId = i;
             player.CurrentNode = startNode;
-            playerObject.name = "Player" + (i + 1);
+            playerObject.name = "プレイヤー" + (i + 1);
 
             players[i] = player;
         }
@@ -55,11 +58,13 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // players[currentPlayerIndex].CurrentNode = nextNode;
-
         switch (currentState)
         {
             case GameState.RollDice:
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    dice.StopRolling();
+                }
                 if (dice.IsStopped)
                 {
                     SetState(GameState.MovePlayer);
@@ -141,6 +146,33 @@ public class GameManager : MonoBehaviour
             {
                 SetState(GameState.EndTurn);
             }
+        }
+    }
+
+    Player GetWinner()
+    {
+        int maxSupporters = -1;
+        Player winner = null;
+
+        foreach (Player player in players)
+        {
+            if (player.Supporters > maxSupporters)
+            {
+                maxSupporters = player.Supporters;
+                winner = player;
+            }
+        }
+
+        return winner;
+    }
+
+    void OnGUI()
+    {
+        GUI.Label(new Rect(10, 10, 100, 20), "ターン: " + (turn + 1), textStyle);
+        GUI.Label(new Rect(10, 50, 100, 20), players[currentPlayerIndex].name, textStyle);
+        if (currentState == GameState.MovePlayer)
+        {
+            GUI.Label(new Rect(10, 90, 100, 20), "残り" + remainingMoves + "マス", textStyle);
         }
     }
 }
