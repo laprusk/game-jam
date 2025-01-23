@@ -17,6 +17,8 @@ public class Node : MonoBehaviour
     private Node[] neighbors;
     [SerializeField]
     private NodeType nodeType;
+    [SerializeField]
+    public bool isUniquePotential;
 
     // Start is called before the first frame update
     void Start()
@@ -52,10 +54,11 @@ public class Node : MonoBehaviour
 
     public void SetRandomNodeType()
     {
-        if (nodeType != NodeType.Unique)
-        {
-            nodeType = (NodeType)Random.Range(0, 2);
-        }
+        // if (!isUniquePotential)
+        // {
+        //     nodeType = (NodeType)Random.Range(0, 2);
+        // }
+        nodeType = (NodeType)Random.Range(0, 2);
         
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         switch (nodeType)
@@ -66,10 +69,14 @@ public class Node : MonoBehaviour
             case NodeType.DecreaseSupporters:
                 spriteRenderer.color = Color.red;
                 break;
-            case NodeType.Unique:
-                spriteRenderer.color = Color.yellow;
-                break;
         }
+    }
+
+    public void SetUniqueNodeType()
+    {
+        nodeType = NodeType.Unique;
+        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+        spriteRenderer.color = Color.yellow;
     }
 
     public void ApplyEffect(Player player)
