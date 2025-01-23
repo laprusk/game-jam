@@ -30,6 +30,8 @@ public class Player : MonoBehaviour
     [SerializeField]
     private Sprite[] playerSprites;
     public bool IsMoving { get; private set; }
+    private bool isActive = false;
+    public int sleepTurn = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -50,6 +52,19 @@ public class Player : MonoBehaviour
         // {
         //     transform.position = Vector2.MoveTowards(transform.position, targetPosition, movementSpeed * Time.deltaTime);
         // }
+        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+        if (isActive)
+        {
+            Color color = spriteRenderer.color;
+            color.a = 1.0f;
+            spriteRenderer.color = color;
+        }
+        else
+        {
+            Color color = spriteRenderer.color;
+            color.a = 0.5f;
+            spriteRenderer.color = color;
+        }
     }
 
     void FixedUpdate()
@@ -75,5 +90,10 @@ public class Player : MonoBehaviour
     public void VisitNode()
     {
         CurrentNode.ApplyEffect(this);
+    }
+
+    public void SetActive(bool active)
+    {
+        isActive = active;
     }
 }

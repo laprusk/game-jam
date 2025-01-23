@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public enum GameState
 {
@@ -36,6 +38,14 @@ public class GameManager : MonoBehaviour
     private Node nextNode;
     [SerializeField]
     private GUIStyle textStyle;
+    [SerializeField]
+    private MessageWindow messageWindow;
+    [SerializeField]
+    private GameObject resultPanel;
+    [SerializeField]
+    private TextMeshProUGUI resultText;
+    private bool isPlayAgain = false;
+    private Node[] visitedNodes = new Node[7];
 
     // Start is called before the first frame update
     void Start()
@@ -55,6 +65,7 @@ public class GameManager : MonoBehaviour
         }
 
         Instance = this;
+        resultPanel.SetActive(false);
         SetState(GameState.StartTurn);
     }
 
@@ -64,7 +75,7 @@ public class GameManager : MonoBehaviour
         switch (currentState)
         {
             case GameState.RollDice:
-                if (Input.GetKeyDown(KeyCode.Space))
+                if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
                 {
                     dice.StopRolling();
                 }
@@ -107,6 +118,17 @@ public class GameManager : MonoBehaviour
 
     void StartTurn()
     {
+        Debug.Log("Start Turn");
+        Debug.Log("Current Player: " + players[currentPlayerIndex].name);
+        if (players[currentPlayerIndex].sleepTurn > 0)
+        {
+            messageWindow.ShowMessage($"{players[currentPlayerIndex].name}は{players[currentPlayerIndex].sleepTurn}ターン休み！");
+            players[currentPlayerIndex].sleepTurn--;
+            // SetState(GameState.EndTurn);
+            return;
+        }
+
+        players[currentPlayerIndex].SetActive(true);
         SetState(GameState.RollDice);
     }
 
@@ -118,23 +140,35 @@ public class GameManager : MonoBehaviour
     void MovePlayer()
     {
         remainingMoves = dice.Value;
+        visitedNodes[remainingMoves] = players[currentPlayerIndex].CurrentNode;
     }
 
     void EndTurn()
     {
-        SetState(GameState.StartTurn);
-        currentPlayerIndex = (currentPlayerIndex + 1) % playerCount;
+        if (isPlayAgain)
+        {
+            isPlayAgain = false;
+            SetState(GameState.StartTurn);
+            return;
+        }     
+
+        players[currentPlayerIndex].SetActive(false);
+        currentPlayerIndex = (currentPlayerIndex + 1) % playerCount;     
         
         if (currentPlayerIndex == 0)
         {
             turn++;
             nodeManager.ResetNodes();
-        }
+        }   
 
         if (turn >= maxTurn)
         {
-            Debug.Log("Game Over");
+            ShowResult();
+            return;
         }
+
+        SetState(GameState.StartTurn);
+        Debug.Log("Next Player: " + players[currentPlayerIndex].name);
     }
 
     public void TryMovePlayer(Node node)
@@ -147,8 +181,19 @@ public class GameManager : MonoBehaviour
         if (currentPlayer.IsMovable(node) && !currentPlayer.IsMoving)
         {
             players[currentPlayerIndex].CurrentNode = node;
+
+            if (remainingMoves + 1 < 7)
+            {
+                if (visitedNodes[remainingMoves + 1] == node)
+                {
+                    ++remainingMoves;
+                    return;
+                }
+            }
             remainingMoves--;
+            visitedNodes[remainingMoves] = node;
             Debug.Log("Remaining Moves: " + remainingMoves);
+            Debug.Log(visitedNodes);
             if (remainingMoves == 0)
             {
                 SetState(GameState.VisitNode);
@@ -164,7 +209,7 @@ public class GameManager : MonoBehaviour
         }
 
         players[currentPlayerIndex].VisitNode();
-        SetState(GameState.EndTurn);
+        // SetState(GameState.EndTurn);
     }
 
     Player GetWinner()
@@ -184,6 +229,14 @@ public class GameManager : MonoBehaviour
         return winner;
     }
 
+    private void ShowResult()
+    {
+        Player winner = GetWinner();
+        Debug.Log("Winner: " + winner.name);
+        resultText.text = winner.name;
+        resultPanel.SetActive(true);
+    }
+
     void OnGUI()
     {
         GUI.Label(new Rect(10, 10, 100, 20), "ターン: " + (turn + 1), textStyle);
@@ -196,6 +249,57 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < playerCount; i++)
         {
             GUI.Label(new Rect(10, 130 + 40 * i, 100, 20), players[i].name + ": " + players[i].Supporters, textStyle);
+        }
+    }
+
+    public void PlayAgain()
+    {
+        players[currentPlayerIndex].Supporters += Convert.ToInt32(players[currentPlayerIndex].Supporters * 0.3);
+        isPlayAgain = true;
+    }
+
+    public void SleepTopPlayer()
+    {
+        int maxSupporters = -1, maxIndex = -1;
+
+        for (int i = 0; i < playerCount; i++)
+        {
+            if (players[i].Supporters > maxSupporters)
+            {
+                maxSupporters = players[i].Supporters;
+                maxIndex = i;
+            }
+        }
+
+        players[maxIndex].sleepTurn = 2;
+    }
+
+    public void MeanSupporters()
+    {
+        int sumSupporters = 0;
+
+        for (int i = 0; i < playerCount; i++)
+        {
+            sumSupporters += players[i].Supporters;
+        }
+
+        int meanSupporters = sumSupporters / playerCount;
+
+        for (int i = 0; i < playerCount; i++)
+        {
+            players[i].Supporters = meanSupporters;
+        }
+    }
+
+    public void StealSupporters()
+    {
+        for (int i = 0; i < playerCount; i++)
+        {
+            if (i != currentPlayerIndex)
+            {
+                players[currentPlayerIndex].Supporters += Convert.ToInt32(players[i].Supporters * 0.2);
+                players[i].Supporters -= Convert.ToInt32(players[i].Supporters * 0.2);
+            }
         }
     }
 }

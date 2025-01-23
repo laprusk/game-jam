@@ -1,3 +1,4 @@
+// using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,6 +20,8 @@ public class Node : MonoBehaviour
     private NodeType nodeType;
     [SerializeField]
     public bool isUniquePotential;
+    [SerializeField]
+    private MessageWindow messageWindow;
 
     // Start is called before the first frame update
     void Start()
@@ -81,15 +84,54 @@ public class Node : MonoBehaviour
 
     public void ApplyEffect(Player player)
     {
+        int value = 0;
+        string message = "";
+        UniqueNodeType uniqueNodeType = UniqueNodeType.PlayAgain;
+
         switch (nodeType)
         {
             case NodeType.IncreaseSupporters:
-                player.Supporters += Random.Range(1, 101);
+                (value, message) = NodeEffectManager.GetRandomIncreasingEffect();
                 break;
             case NodeType.DecreaseSupporters:
-                player.Supporters -= Random.Range(1, 101);
+                (value, message) = NodeEffectManager.GetRandomDecreasingEffect();
+                break;
+            case NodeType.Unique:
+                (message, uniqueNodeType) = NodeEffectManager.GetRandomUniqueEffect();
                 break;
         }
+
+        string resultMessage;
+        if (nodeType != NodeType.Unique)
+        {
+            resultMessage = $"{message}\n支持者が{System.Math.Abs(value)}人";
+            if (value > 0) resultMessage += "増加した！";
+            else resultMessage += "減少した…";
+            player.Supporters += value;
+        }
+        else
+        {
+            resultMessage = message;
+            switch (uniqueNodeType)
+            {
+                case UniqueNodeType.PlayAgain:
+                    GameManager.Instance.PlayAgain();
+                    break;
+                case UniqueNodeType.SleepTop:
+                    GameManager.Instance.SleepTopPlayer();
+                    break;
+                case UniqueNodeType.MeanSupporters:
+                    GameManager.Instance.MeanSupporters();
+                    break;
+                case UniqueNodeType.StealSupporters:
+                    GameManager.Instance.StealSupporters();
+                    break;
+            }
+        }
+
+        Debug.Log(resultMessage);
+        Debug.Log(messageWindow);
+        messageWindow.ShowMessage(resultMessage);
     }
 
     public void PlacePath(Vector2 startPos, Vector2 endPos)
