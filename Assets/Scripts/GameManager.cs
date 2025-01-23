@@ -7,6 +7,7 @@ public enum GameState
     StartTurn,
     RollDice,
     MovePlayer,
+    VisitNode,
     EndTurn
 }
 
@@ -16,6 +17,8 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private GameObject playerPrefab;
+    [SerializeField]
+    private NodeManager nodeManager;
     [SerializeField]
     private Node startNode;
     [SerializeField]
@@ -93,6 +96,9 @@ public class GameManager : MonoBehaviour
             case GameState.MovePlayer:
                 MovePlayer();
                 break;
+            case GameState.VisitNode:
+                StartCoroutine(VisitNode());
+                break;
             case GameState.EndTurn:
                 EndTurn();
                 break;
@@ -122,6 +128,7 @@ public class GameManager : MonoBehaviour
         if (currentPlayerIndex == 0)
         {
             turn++;
+            nodeManager.ResetNodes();
         }
 
         if (turn >= maxTurn)
@@ -144,9 +151,20 @@ public class GameManager : MonoBehaviour
             Debug.Log("Remaining Moves: " + remainingMoves);
             if (remainingMoves == 0)
             {
-                SetState(GameState.EndTurn);
+                SetState(GameState.VisitNode);
             }
         }
+    }
+
+    IEnumerator VisitNode()
+    {
+        while (players[currentPlayerIndex].IsMoving)
+        {
+            yield return null;
+        }
+
+        players[currentPlayerIndex].VisitNode();
+        SetState(GameState.EndTurn);
     }
 
     Player GetWinner()
@@ -173,6 +191,11 @@ public class GameManager : MonoBehaviour
         if (currentState == GameState.MovePlayer)
         {
             GUI.Label(new Rect(10, 90, 100, 20), "残り" + remainingMoves + "マス", textStyle);
+        }
+
+        for (int i = 0; i < playerCount; i++)
+        {
+            GUI.Label(new Rect(10, 130 + 40 * i, 100, 20), players[i].name + ": " + players[i].Supporters, textStyle);
         }
     }
 }
