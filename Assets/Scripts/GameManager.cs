@@ -239,16 +239,16 @@ public class GameManager : MonoBehaviour
 
     void OnGUI()
     {
-        GUI.Label(new Rect(10, 10, 100, 20), "ターン: " + (turn + 1), textStyle);
-        GUI.Label(new Rect(10, 50, 100, 20), players[currentPlayerIndex].name, textStyle);
+        GUI.Label(new Rect(20, 20, 100, 20), "ターン: " + (turn + 1), textStyle);
+        GUI.Label(new Rect(20, 60, 100, 20), players[currentPlayerIndex].name, textStyle);
         if (currentState == GameState.MovePlayer)
         {
-            GUI.Label(new Rect(10, 90, 100, 20), "残り" + remainingMoves + "マス", textStyle);
+            GUI.Label(new Rect(20, 100, 100, 20), "残り" + remainingMoves + "マス", textStyle);
         }
 
         for (int i = 0; i < playerCount; i++)
         {
-            GUI.Label(new Rect(10, 130 + 40 * i, 100, 20), players[i].name + ": " + players[i].Supporters, textStyle);
+            GUI.Label(new Rect(20, 140 + 40 * i, 100, 20), players[i].name + ": " + players[i].Supporters, textStyle);
         }
     }
 
