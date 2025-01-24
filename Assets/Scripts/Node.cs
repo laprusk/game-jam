@@ -23,6 +23,11 @@ public class Node : MonoBehaviour
     [SerializeField]
     private MessageWindow messageWindow;
 
+    public AudioClip increaseSupportersSound;
+    public AudioClip decreaseSupportersSound;
+    public AudioClip uniqueSound;
+    private AudioSource audioSource;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -132,6 +137,21 @@ public class Node : MonoBehaviour
         Debug.Log(resultMessage);
         Debug.Log(messageWindow);
         messageWindow.ShowMessage(resultMessage);
+
+        audioSource = GetComponent<AudioSource>();
+        switch (nodeType)
+        {
+            case NodeType.IncreaseSupporters:
+                audioSource.clip = increaseSupportersSound;
+                break;
+            case NodeType.DecreaseSupporters:
+                audioSource.clip = decreaseSupportersSound;
+                break;
+            case NodeType.Unique:
+                audioSource.clip = uniqueSound;
+                break;
+        }
+        audioSource.Play();
     }
 
     public void PlacePath(Vector2 startPos, Vector2 endPos)

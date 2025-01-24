@@ -90,8 +90,8 @@ public class GameManager : MonoBehaviour
     public void SetState(GameState state)
     {
         currentState = state;
-        OnStateChange();
         Debug.Log("State: " + currentState);
+        OnStateChange();
     }
 
     void OnStateChange()
@@ -140,17 +140,20 @@ public class GameManager : MonoBehaviour
     void MovePlayer()
     {
         remainingMoves = dice.Value;
+        visitedNodes = new Node[7];
         visitedNodes[remainingMoves] = players[currentPlayerIndex].CurrentNode;
+        Debug.Log("MovePlayer: " + remainingMoves);
     }
 
     void EndTurn()
     {
         if (isPlayAgain)
         {
+            Debug.Log("Play Again");
             isPlayAgain = false;
             SetState(GameState.StartTurn);
             return;
-        }     
+        }
 
         players[currentPlayerIndex].SetActive(false);
         currentPlayerIndex = (currentPlayerIndex + 1) % playerCount;     
@@ -181,11 +184,13 @@ public class GameManager : MonoBehaviour
         if (currentPlayer.IsMovable(node) && !currentPlayer.IsMoving)
         {
             players[currentPlayerIndex].CurrentNode = node;
+            players[currentPlayerIndex].PlayMoveSound();
 
-            if (remainingMoves + 1 < 7)
+            if (remainingMoves + 1 < dice.Value + 1)
             {
                 if (visitedNodes[remainingMoves + 1] == node)
                 {
+                    Debug.Log("Return to Previous Node");
                     ++remainingMoves;
                     return;
                 }
@@ -235,6 +240,8 @@ public class GameManager : MonoBehaviour
         Debug.Log("Winner: " + winner.name);
         resultText.text = winner.name;
         resultPanel.SetActive(true);
+
+        GetComponent<AudioSource>().Play();
     }
 
     void OnGUI()

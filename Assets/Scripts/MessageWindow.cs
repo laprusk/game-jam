@@ -50,5 +50,6 @@ public class MessageWindow : MonoBehaviour
         panel.SetActive(false);
         yield return new WaitForSeconds(0.5f);
         GameManager.Instance.SetState(GameState.EndTurn);
+        Debug.Log("MessageWindow Closed");
     }
 }
