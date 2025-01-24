@@ -28,17 +28,17 @@ public class Dice : MonoBehaviour
         
     }
 
-    void OnMouseDown()
-    {
-        if (!IsRolling)
-        {
-            StartRolling();
-        }
-        else
-        {
-            StopRolling();
-        }
-    }
+    // void OnMouseDown()
+    // {
+    //     if (!IsRolling)
+    //     {
+    //         StartRolling();
+    //     }
+    //     else
+    //     {
+    //         StopRolling();
+    //     }
+    // }
 
     public void StartRolling()
     {
