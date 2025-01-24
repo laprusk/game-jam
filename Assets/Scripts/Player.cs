@@ -96,4 +96,9 @@ public class Player : MonoBehaviour
     {
         isActive = active;
     }
+
+    public void PlayMoveSound()
+    {
+        GetComponent<AudioSource>().Play();
+    }
 }

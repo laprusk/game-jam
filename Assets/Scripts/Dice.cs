@@ -15,6 +15,10 @@ public class Dice : MonoBehaviour
     [SerializeField]
     private Sprite[] diceFaces;
 
+    public AudioClip diceRollSound;
+    public AudioClip diceStopSound;
+    private AudioSource audioSource;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -48,6 +52,11 @@ public class Dice : MonoBehaviour
             IsRolling = true;
             IsStopped = false;
             StartCoroutine(Roll());
+            
+            audioSource = GetComponent<AudioSource>();
+            audioSource.clip = diceRollSound;
+            audioSource.Play();
+            audioSource.loop = true;
         }
     }
 
@@ -57,6 +66,10 @@ public class Dice : MonoBehaviour
         {
             Debug.Log("Stop Rolling");
             IsRolling = false; 
+            audioSource.Stop();
+            audioSource.loop = false;
+            audioSource.clip = diceStopSound;
+            audioSource.Play();
         }
     }
 
